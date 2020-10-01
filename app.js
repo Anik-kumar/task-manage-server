@@ -31,8 +31,8 @@ app.post('/lists', (req, res) => {
   let newList = new List({
     title: title
   });
-  newList.save().then((list) => {
-    res.send(list);
+  newList.save().then((savedList) => {
+    res.send(savedList).status(200);
   });
 });
 
@@ -62,24 +62,88 @@ app.delete('/lists/:id', (req, res) => {
   // delete a list
   List.findOneAndDelete({
     _id: req.params.id
-  }).then( (list) => {
+  }).then( (removedTist) => {
     console.log("List is deleted");
-    res.status(200).send(list);
+    res.status(200).send(removedTist);
   }).catch( err => {
     console.log("-- List Delete Error --");
     console.log(err);
   });
 });
 
-
 /**
  * returns tasks of list id
  */
 app.get('/lists/:listId/tasks', (req, res) => {
-
+  //
+  Task.find({
+    _listId: req.params.listId
+  }).then( (tasks) => {
+    res.status(200).send(tasks);
+  }).catch( err => {
+    console.log(err);
+    res.status(500);
+  });
 });
+
+/**
+ * creates a task and returns it
+ */
+app.post('/lists/:listId/tasks', (req, res) => {
+  // create new task under the listId
+  let task = req.body.task;
+  let newTask = new Task({
+    title: task,
+    _listId: req.params.listId
+  });
+  newTask.save().then( (savedTask) => {
+    res.send(savedTask).status(200);
+  }).catch( err => {
+    console.log(err);
+    res.sendStatus(500);
+  });
+});
+
+/**
+ * updates a task info and returns status
+ */
+app.patch('/lists/:listId/tasks/:taskId', (req, res) => {
+  //
+  Task.findOneAndUpdate({
+    _id: req.params.taskId,
+    _listId: req.params.listId
+  }, {
+    $set: req.body
+  }).then( () => {
+    console.log("Task is updated");
+    res.sendStatus(200);
+  }).catch( err => {
+    console.log("-- Task update error --");
+    console.log(err);
+    res.sendStatus(500);
+  });
+});
+
+/**
+ * deletes a task
+ */
+app.delete('/lists/:listId/tasks/:taskId', (req, res) => {
+  //
+  Task.findOneAndDelete({
+    _id: req.params.taskId,
+    _listId: req.params.listId
+  }).then( removedTask => {
+    console.log("Task is deleted");
+    res.send(removedTask).status(200);
+  }).catch( err => {
+    console.log("-- Task Delete Error --");
+    console.error(err);
+    res.sendStatus(500);
+  });
+});
+
 
 
 app.listen(3000, ()=> {
   console.log("-- Server is running on port 3000 --")
-})
+});
