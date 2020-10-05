@@ -6,6 +6,12 @@ const mongoose = require('./db/mongoose');
 const { List } = require('./db/models/lists');
 const { Task } = require('./db/models/task');
 
+// cors header middleware
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 app.use(bodyParser.json());
 
 app.get('/ink', (req, res) => {
@@ -79,6 +85,7 @@ app.get('/lists/:listId/tasks', (req, res) => {
   Task.find({
     _listId: req.params.listId
   }).then( (tasks) => {
+    console.log("retrieved tasks");
     res.status(200).send(tasks);
   }).catch( err => {
     console.log(err);
@@ -97,10 +104,11 @@ app.post('/lists/:listId/tasks', (req, res) => {
     _listId: req.params.listId
   });
   newTask.save().then( (savedTask) => {
+    console.log("new task added");
     res.send(savedTask).status(200);
   }).catch( err => {
     console.log(err);
-    res.sendStatus(500);
+    res.send(err).status(400);
   });
 });
 
