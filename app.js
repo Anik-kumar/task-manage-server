@@ -9,6 +9,7 @@ const { Task } = require('./db/models/task');
 // cors header middleware
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
@@ -53,7 +54,9 @@ app.patch('/lists/:id', (req, res) => {
     },{
       $set: req.body
     }).then( () => {
-      res.sendStatus(200);
+      res.status(200).send({
+				message: "List is updated",
+			});
       console.log("List is updated");
     }).catch( err => {
       console.log("-- List update error --");
@@ -124,11 +127,15 @@ app.patch('/lists/:listId/tasks/:taskId', (req, res) => {
     $set: req.body
   }).then( () => {
     console.log("Task is updated");
-    res.sendStatus(200);
+    res.status(200).send({
+			message: "Task is updated",
+		});
   }).catch( err => {
     console.log("-- Task update error --");
     console.log(err);
-    res.sendStatus(500);
+    res.status(500).send({
+			message: err,
+		});
   });
 });
 
@@ -146,7 +153,9 @@ app.delete('/lists/:listId/tasks/:taskId', (req, res) => {
   }).catch( err => {
     console.log("-- Task Delete Error --");
     console.error(err);
-    res.sendStatus(500);
+    res.status(500).send({
+			message: err
+		});
   });
 });
 
